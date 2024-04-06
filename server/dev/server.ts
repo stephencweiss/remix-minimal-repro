@@ -1,6 +1,8 @@
+import { env } from "env-variables";
+
 // This server is only used to load the dev server build
 const viteDevServer =
-  process.env.NODE_ENV === "production"
+  env.environment === "production"
     ? undefined
     : await import("vite").then((vite) =>
         vite.createServer({

@@ -1,14 +1,21 @@
+import { LoaderFunctionArgs } from "@remix-run/node";
 import {
   Links,
   Meta,
   Outlet,
   Scripts,
   ScrollRestoration,
+  json,
 } from "@remix-run/react";
-import { LinksFunction } from "@remix-run/node";
-import styles from "~/tailwind.css?url";
 
-export const links: LinksFunction = () => [{ rel: "stylesheet", href: styles }];
+// https://remix.run/docs/en/main/future/vite#fix-up-css-imports
+import "~/tailwind.css";
+import "~/global.css";
+import { getUser } from "./session.server";
+
+export const loader = async ({ request, context }: LoaderFunctionArgs) => {
+  return json({ user: await getUser(context.db, request) });
+};
 
 export default function App() {
   return (
@@ -26,6 +33,15 @@ export default function App() {
         <Outlet />
         <ScrollRestoration />
         <Scripts />
+        {/* <!-- Fathom - beautiful, simple website analytics --> */}
+        {/* {env.environment === "production" ? (
+          <script
+            src="https://cdn.usefathom.com/script.js"
+            data-site="ZLKXCGUA"
+            defer
+          ></script>
+        ) : null} */}
+        {/* <!-- / Fathom --> */}
       </body>
     </html>
   );

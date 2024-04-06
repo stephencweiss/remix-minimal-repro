@@ -1,0 +1,19 @@
+.text > a {
+  text-decoration: underline;
+  color: #2563eb; /* bg-blue-600 */
+}
+
+.text > a:hover {
+  background-color: #2563eb; /* hover:bg-blue-600 */
+  color: #ffffff; /* hover:text-white */
+}
+
+.text > a:active {
+  background-color: #60a5fa; /* active:bg-blue-400 */
+  color: #ffffff; /* hover:text-white */
+}
+
+.text > a:focus {
+  background-color: #1e40af; /* focus:bg-blue-700 */
+  color: #ffffff; /* hover:text-white */
+}

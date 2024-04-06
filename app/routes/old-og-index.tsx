@@ -1,3 +1,7 @@
+// This is the original index file.
+// Keeping it because it shows how to use some interesting patterns.
+// Look at https://github.com/rphlmr/remix-galaxy/tree/main for more examples.
+
 import {
   unstable_createMemoryUploadHandler,
   type ActionFunctionArgs,
@@ -15,6 +19,10 @@ import {
 } from "@remix-run/react";
 import { Suspense } from "react";
 
+import Button from "~/component";
+import { db } from "~/db/db.server";
+import { users } from "~/db/schema";
+
 export const meta: MetaFunction = () => {
   return [
     { title: "New Remix App" },
@@ -22,13 +30,15 @@ export const meta: MetaFunction = () => {
   ];
 };
 
-export function loader({ context }: LoaderFunctionArgs) {
+export async function loader({ context }: LoaderFunctionArgs) {
+  const userRes = await db.select().from(users);
   const { appVersion } = context;
   const message = "Hello World from Remix Vite loader";
-  console.log(message, appVersion);
+  console.log(message, appVersion, userRes);
   return defer({
     message,
     appVersion,
+    users: userRes,
     lastNews: (async () => {
       await new Promise((resolve) => setTimeout(resolve, 2000));
       return [
@@ -84,7 +94,7 @@ export default function Index() {
         <div className="border-2 flex flex-col rounded-md p-4 gap-2">
           <h2 className="text-md font-bold">HMR</h2>
           <label>
-            Should persist state across HMR
+            Should persist state across HMR!
             <input type="text" placeholder="HMR test" className="ml-2" />
           </label>
           <p>
@@ -95,6 +105,7 @@ export default function Index() {
         </div>
 
         <div className="border-2 flex flex-col rounded-md p-4 gap-2">
+          <Button>click and do nothing</Button>
           <h2 className="text-md font-bold">Action</h2>
           <Form
             encType="multipart/form-data"
@@ -103,8 +114,9 @@ export default function Index() {
           >
             <label className="text-white">
               Upload a file
-              <input type="file" accept="image/*" name="file" />
+              <input type="file" accept="*" name="file" id="file-upload" />
             </label>
+
             <button
               type="submit"
               className="w-fit rounded-md bg-white p-2 text-black"

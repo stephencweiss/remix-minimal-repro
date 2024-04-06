@@ -3,17 +3,21 @@ import { serveStatic } from "@hono/node-server/serve-static";
 import {
   type AppLoadContext,
   createCookieSessionStorage,
-  type ServerBuild,
 } from "@remix-run/node";
+import { type ServerBuild } from "@remix-run/server-runtime";
 import { Hono } from "hono";
 import { logger } from "hono/logger";
 import { remix } from "remix-hono/handler";
 import { session } from "remix-hono/session";
+
+import { env } from "env-variables";
 import { cache } from "server/middlewares";
+import { type DBConnection, db } from "~/db/db.server";
+
 import { importDevBuild } from "./dev/server";
 
 const mode =
-  process.env.NODE_ENV === "test" ? "development" : process.env.NODE_ENV;
+  env.environment === "test" ? "development" : env.environment;
 
 const isProductionMode = mode === "production";
 
@@ -46,6 +50,7 @@ app.use("*", logger());
  * Add session middleware (https://github.com/sergiodxa/remix-hono?tab=readme-ov-file#session-management)
  */
 app.use(
+
   session({
     autoCommit: true,
     createSessionStorage() {
@@ -59,8 +64,8 @@ app.use(
           httpOnly: true,
           path: "/",
           sameSite: "lax",
-          secrets: [process.env.SESSION_SECRET],
-          secure: process.env.NODE_ENV === "production",
+          secrets: [env.sessionSecret],
+          secure: env.environment === "production",
         },
       });
 
@@ -83,9 +88,9 @@ app.use(
 app.use(async (c, next) => {
   const build = (isProductionMode
     ? // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      // eslint-disable-next-line import/no-unresolved -- this expected until you build the app
-      await import("../build/server/remix.js")
+    // @ts-ignore
+    // eslint-disable-next-line import/no-unresolved -- this expected until you build the app
+    await import("../build/server/remix.js")
     : await importDevBuild()) as unknown as ServerBuild;
 
   return remix({
@@ -94,6 +99,7 @@ app.use(async (c, next) => {
     getLoadContext() {
       return {
         appVersion: isProductionMode ? build.assets.version : "dev",
+        db,
       } satisfies AppLoadContext;
     },
   })(c, next);
@@ -107,7 +113,7 @@ if (isProductionMode) {
   serve(
     {
       ...app,
-      port: Number(process.env.PORT) || 3000,
+      port: Number(env.port) || 3000,
     },
     async (info) => {
       console.log(`🚀 Server started on port ${info.port}`);
@@ -126,5 +132,9 @@ declare module "@remix-run/node" {
      * The app version from the build assets
      */
     readonly appVersion: string;
+    /**
+     * The database connection
+     */
+    readonly db: DBConnection;
   }
 }
