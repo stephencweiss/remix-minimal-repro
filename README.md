@@ -1,6 +1,20 @@
-# Welcome to Remix + Vite + Hono!
+# Description
 
-This is a demo of [remix-hono](https://github.com/sergiodxa/remix-hono) with Vite. 
+This is based on the demo of [remix-hono](https://github.com/sergiodxa/remix-hono) with Vite.
+
+The purpose of this demo is to demonstrate a bug I'm facing with how the Router is working.
+
+On the Index route, there are two sets of links, one using `<Link>` and one using the `<a>` tag.
+
+The `<Link>` ends up creating what I'm thinking of as a race condition. You can see that in the logs where a single click on a link will generate two requests on the server. One to the desired route (e.g., `/join`) and an immediate follow up to the `/` route.
+
+This is *not* the case with the `<a>` tags.
+
+![video](./docs/demo.gif)
+(example video is found in the [docs directory](./docs))
+
+Original README
+---
 
 It uses [Hono Vite dev server](https://github.com/honojs/vite-plugins/blob/main/packages/dev-server/README.md) with HTTPS
 
